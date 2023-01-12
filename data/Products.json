@@ -1,0 +1,74 @@
+[
+  {
+    "_id": "0282e0e58a5c404fbd15261f11c2ab6a",
+    "category_id": "01",
+    "category_name": "APPLE",
+    "name": "MACBOOK AIR (RETINA) / MACOS",
+    "location": "Zona Lazio, Roma",
+    "original_price": "955",
+    "resale_price": "600",
+    "used": "1 year",
+    "published_date": "12/01/2023",
+   "img": "https://i.ibb.co/tC1nFCK/lap1.jpg"
+    },
+    {
+      "_id": "0282e0e58a5c404fbd15261f11c2ab6b",
+      "category_id": "01",
+      "category_name": "APPLE",
+    "name": "MACBOOK AIR (13-INCH, M1, 2020) / MACOS",
+    "location": "Stazione centrale, Milano",
+    "original_price": "1199",
+    "resale_price": "850",
+    "used": "2 years",
+    "published_date": "12/01/2023",
+   "img": "https://i.ibb.co/9pjdTFz/card8.webp"
+    },
+  {
+    "_id": "f69a695f037cd9484cecaea37ca71011",
+    "category_id": "02",
+    "category_name": "ASUS",
+    "name": "VIVOBOOK E SERIES / WINDOWS / LINUX / DOS",
+    "location": "politeama, Palermo",
+    "original_price": "759",
+    "resale_price": "400",
+    "used": "1 year",
+    "published_date": "12/01/2023",
+   "img": "https://i.ibb.co/3rQPqnF/card4.jpg"
+    },
+  {
+    "_id": "f69a695f037cd9484cecaea37ca71012",
+    "category_id": "02",
+    "category_name": "ASUS",
+    "name": "ZENBOOK PRIME SERIES / WINDOWS / LINUX / DOS",
+    "location": "politeama, Palermo",
+    "original_price": "1200",
+    "resale_price": "650",
+    "used": "2 year",
+    "published_date": "12/01/2023",
+   "img": "https://i.ibb.co/hDdwfcb/lap2.webp"
+    },
+{
+  "_id": "11468ed61aee84de492a8b04158a22f9",
+  "category_id": "03",
+  "category_name": "DELL",
+    "name": "INSPIRON 2100 SERIES / WINDOWS / LINUX / DOS",
+    "location": "stazione centrale, Palermo",
+    "original_price": "700",
+    "resale_price": "400",
+    "used": "1 year",
+    "published_date": "12/01/2023",
+   "img": "https://i.ibb.co/LvVKhjm/cardpic1.jpg"
+    },
+    {
+    "_id": "11468ed61aee84de492a8b04158a22f0",
+    "category_id": "03",
+    "category_name": "DELL",
+    "name": "INSPIRON 3800 SERIES / WINDOWS / LINUX / DOS",
+    "location": "stazione centrale, Palermo",
+    "original_price": "600",
+    "resale_price": "250",
+    "used": "1 year",
+    "published_date": "12/01/2023",
+   "img": "https://i.ibb.co/HYRhpwC/card5.webp"
+    }
+]

@@ -13,6 +13,8 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+const products = require('./data/products.json');
+
 async function run() {
   try{
     const categoryCollection = client.db('TechMate')
@@ -23,6 +25,11 @@ app.get( '/product-categories', async (req, res) =>{
   const categories = await cursor.toArray();
   res.send(categories);
 })
+app.get('/category/:id', (req, res) => {
+  const id = req.params.id;
+      const category_products = products.filter(p => p.category_id === id);
+      res.send(category_products);
+  })
 
 }
   finally{

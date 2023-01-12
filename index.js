@@ -15,6 +15,23 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 const products = require('./data/products.json');
 
+function verifyJWT(req, res, next){
+
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+     return res.status(401).send('unauthorized access')
+  }
+
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded){
+      if(err){
+        return res.status(403).send({message: 'forbidden access'})
+      }
+      req.decoded = decoded;
+      next();
+  })
+}
+
 async function run() {
   try{
     const categoryCollection = client.db('TechMate')
@@ -37,6 +54,17 @@ app.get('/category/:id', (req, res) => {
     const blog = await cursor.toArray();
     res.send(blog);
   })
+  app.get('/jwt', async(req, res) =>{
+    const email = req.query.email;
+    const query = {email: email};
+    const user = await usersCollection.findOne(query);
+    if(user){
+      const token = jwt.sign({email}, process.env.ACCESS_TOKEN)
+      // const token = jwt.sign({email}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
+        return res.send({accessToken: token}); 
+    }
+    res.status(403).send({accessToken: ''})
+});
 
 }
   finally{
@@ -49,6 +77,7 @@ run().catch(err => console.log(err));
 app.listen(port, () =>{
   console.log(`server running on port: ${port}`)
 });
+
 
 
 

@@ -19,6 +19,8 @@ async function run() {
   try{
     const categoryCollection = client.db('TechMate')
 .collection('categories');
+const blogCollection = client.db('TechMate')
+.collection('blog');
 
 app.get( '/product-categories', async (req, res) =>{
   const cursor = categoryCollection.find({})
@@ -29,6 +31,11 @@ app.get('/category/:id', (req, res) => {
   const id = req.params.id;
       const category_products = products.filter(p => p.category_id === id);
       res.send(category_products);
+  })
+  app.get( '/blog', async (req, res) =>{
+    const cursor = blogCollection.find({})
+    const blog = await cursor.toArray();
+    res.send(blog);
   })
 
 }

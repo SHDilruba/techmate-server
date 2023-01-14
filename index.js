@@ -32,23 +32,26 @@ function verifyJWT(req, res, next){
   })
 }
 
-async function run() {
+async function run(){
   try{
     const categoryCollection = client.db('TechMate')
 .collection('categories');
+const categoryProductCollection = client.db('TechMate')
+.collection('products');
 const blogCollection = client.db('TechMate')
 .collection('blog');
+const userCollection = client.db('TechMate').collection('users');
 
 app.get( '/product-categories', async (req, res) =>{
   const cursor = categoryCollection.find({})
   const categories = await cursor.toArray();
   res.send(categories);
 })
-app.get('/category/:id', (req, res) => {
-  const id = req.params.id;
-      const category_products = products.filter(p => p.category_id === id);
-      res.send(category_products);
-  })
+app.get( '/products', async (req, res) =>{
+  const cursor = categoryProductCollection.find({})
+  const allProduct = await cursor.toArray();
+  res.send(allProduct);
+})
   app.get( '/blog', async (req, res) =>{
     const cursor = blogCollection.find({})
     const blog = await cursor.toArray();
@@ -64,6 +67,17 @@ app.get('/category/:id', (req, res) => {
         return res.send({accessToken: token}); 
     }
     res.status(403).send({accessToken: ''})
+});
+app.get('/users', async(req, res)=>{
+  const query = {};
+  const users = await userCollection.find(query).toArray();
+  res.send(users);
+});
+
+app.post('/users', async(req, res) =>{
+    const user = req.body;
+    const result = await userCollection.insertOne(user);
+    res.send(result);
 });
 
 }

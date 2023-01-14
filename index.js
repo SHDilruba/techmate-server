@@ -47,6 +47,11 @@ app.get( '/product-categories', async (req, res) =>{
   const categories = await cursor.toArray();
   res.send(categories);
 })
+app.get('/category/:id', (req, res) => {
+  const id = req.params.id;
+      const category_products = products.filter(p => p.category_id === id);
+      res.send(category_products);
+  })
 app.get( '/products', async (req, res) =>{
   const cursor = categoryProductCollection.find({})
   const allProduct = await cursor.toArray();

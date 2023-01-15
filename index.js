@@ -14,8 +14,6 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-// const products = require('./data/products.json');
-
 function verifyJWT(req, res, next){
 
   const authHeader = req.headers.authorization;
@@ -41,7 +39,7 @@ const categoryProductCollection = client.db('TechMate')
 .collection('products');
 const blogCollection = client.db('TechMate')
 .collection('blog');
-const userCollection = client.db('TechMate').collection('users');
+const usersCollection = client.db('TechMate').collection('users');
 
 app.get( '/product-categories', async (req, res) =>{
   const cursor = categoryCollection.find({})
@@ -85,14 +83,31 @@ app.get( '/products', async (req, res) =>{
 });
 app.get('/users', async(req, res)=>{
   const query = {};
-  const users = await userCollection.find(query).toArray();
+  const users = await usersCollection.find(query).toArray();
   res.send(users);
 });
-
+app.get('/users/admin/:email', async(req, res) =>{
+  const email = req.params.email;
+  const query = { email }
+  const user = await usersCollection.findOne(query);
+  res.send({isAdmin: user?.role === 'admin'});
+});
 app.post('/users', async(req, res) =>{
     const user = req.body;
-    const result = await userCollection.insertOne(user);
+    const result = await usersCollection.insertOne(user);
     res.send(result);
+});
+app.put('/users/:admin/:id', verifyJWT, async(req, res) =>{
+  const id = req.params.id;
+  const filter = { _id: ObjectId(id) }
+  const options = { upsert: true };
+  const updatedDoc = {
+    $set: {
+      role: 'admin'
+    }
+  }
+  const result = await usersCollection.updateOne(filter, updatedDoc, options);
+  res.send(result);
 });
 
 }
@@ -101,7 +116,6 @@ app.post('/users', async(req, res) =>{
   }
 }
 run().catch(err => console.log(err));
-
 
 app.listen(port, () =>{
   console.log(`server running on port: ${port}`)

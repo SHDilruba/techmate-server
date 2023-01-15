@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken'); 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
@@ -13,7 +14,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-const products = require('./data/products.json');
+// const products = require('./data/products.json');
 
 function verifyJWT(req, res, next){
 
@@ -47,11 +48,20 @@ app.get( '/product-categories', async (req, res) =>{
   const categories = await cursor.toArray();
   res.send(categories);
 })
-app.get('/category/:id', (req, res) => {
+app.get('/category/:id', async(req, res) => {
   const id = req.params.id;
-      const category_products = products.filter(p => p.category_id === id);
-      res.send(category_products);
-  })
+  const query = {};
+  const products = await categoryProductCollection.find(query).toArray();
+  const category_products = products.filter(p => p.category_id === id);
+  res.send(category_products);
+  });
+  app.post('/products', async(req, res) =>{
+    const product = req.body;
+    const result = await categoryProductCollection.insertOne(product);
+    console.log(result);
+    product.category_id = product.insertedId;
+    res.send(product);
+ });
 app.get( '/products', async (req, res) =>{
   const cursor = categoryProductCollection.find({})
   const allProduct = await cursor.toArray();
@@ -68,7 +78,7 @@ app.get( '/products', async (req, res) =>{
     const user = await usersCollection.findOne(query);
     if(user){
       const token = jwt.sign({email}, process.env.ACCESS_TOKEN)
-      // const token = jwt.sign({email}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
+      // const token = jwt.sign({email}, process.env.ACCESS_TOKEN, {expiresIn: '1day'})
         return res.send({accessToken: token}); 
     }
     res.status(403).send({accessToken: ''})

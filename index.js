@@ -40,6 +40,18 @@ const categoryProductCollection = client.db('TechMate')
 const blogCollection = client.db('TechMate')
 .collection('blog');
 const usersCollection = client.db('TechMate').collection('users');
+const bookingsCollection = client.db('TechMate').collection('bookings');
+
+app.post('/bookings', async(req, res) =>{
+  const booking = req.body
+  console.log(booking);
+   const query = {
+       email: booking.email,
+       name: booking.name,
+   }
+  const result = await bookingsCollection.insertOne(booking);
+  res.send(result);
+});
 
 app.get( '/product-categories', async (req, res) =>{
   const cursor = categoryCollection.find({})
@@ -56,7 +68,6 @@ app.get('/category/:id', async(req, res) => {
   app.post('/products', async(req, res) =>{
     const product = req.body;
     const result = await categoryProductCollection.insertOne(product);
-    console.log(result);
     product.category_id = product.insertedId;
     res.send(product);
  });
@@ -65,6 +76,12 @@ app.get( '/products', async (req, res) =>{
   const allProduct = await cursor.toArray();
   res.send(allProduct);
 })
+app.get('/products/:id', async(req, res) => {
+  const id = req.params.id;
+  const query = {_id: ObjectId(id)};
+  const product = await categoryProductCollection.findOne(query);
+  res.send(product);
+});
   app.get( '/blog', async (req, res) =>{
     const cursor = blogCollection.find({})
     const blog = await cursor.toArray();
@@ -97,18 +114,6 @@ app.post('/users', async(req, res) =>{
     const result = await usersCollection.insertOne(user);
     res.send(result);
 });
-app.put('/users/:admin/:id', verifyJWT, async(req, res) =>{
-  const id = req.params.id;
-  const filter = { _id: ObjectId(id) }
-  const options = { upsert: true };
-  const updatedDoc = {
-    $set: {
-      role: 'admin'
-    }
-  }
-  const result = await usersCollection.updateOne(filter, updatedDoc, options);
-  res.send(result);
-});
 
 }
   finally{
@@ -116,6 +121,10 @@ app.put('/users/:admin/:id', verifyJWT, async(req, res) =>{
   }
 }
 run().catch(err => console.log(err));
+
+app.get('/', (req, res) => {
+  res.send('TechMate API Running');
+});
 
 app.listen(port, () =>{
   console.log(`server running on port: ${port}`)

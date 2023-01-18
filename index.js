@@ -198,6 +198,13 @@ app.get('/users/sellers', async(req, res) => {
   res.send(sellers);
   });
 
+  app.get('/users/buyers', async(req, res) => {
+    const query = {};
+    const users = await usersCollection.find(query).toArray();
+    const buyers = users.filter(user => user?.role !=='admin' && user?.role !== 'seller');
+    res.send(buyers);
+    });
+
 app.post('/users', async(req, res) =>{
     const user = req.body;
     const result = await usersCollection.insertOne(user);

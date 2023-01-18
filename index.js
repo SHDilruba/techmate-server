@@ -41,6 +41,18 @@ const blogCollection = client.db('TechMate')
 .collection('blog');
 const usersCollection = client.db('TechMate').collection('users');
 const bookingsCollection = client.db('TechMate').collection('bookings');
+const wishlistCollection = client.db('TechMate').collection('wishlist');
+
+const verifyAdmin = async(req, res, next) => {
+  const decodedEmail = req.decoded.email;
+  const query = { email: decodedEmail };
+  const user = await usersCollection.findOne(query);
+
+  if(user?.role !== 'admin'){
+      return res.status(403).send({ message: 'forbidden access'})
+  }
+  next();
+};
 
 app.post('/bookings', async(req, res) =>{
   const booking = req.body
@@ -51,6 +63,56 @@ app.post('/bookings', async(req, res) =>{
    }
   const result = await bookingsCollection.insertOne(booking);
   res.send(result);
+});
+app.get('/bookings', verifyJWT, async(req, res) =>{
+  const email = req.query.email;
+  const decodedEmail = req.decoded.email;
+
+  if(email !== decodedEmail){
+      return res.status(403).send({message: 'forbidden access'});
+  }
+
+  const query = {email: email};
+  const bookings = await bookingsCollection.find(query).toArray();
+  res.send(bookings);
+});
+
+app.get('/bookings/:id', async(req, res) =>{
+  const id = req.params.id;
+  const query = { _id: ObjectId(id) } ;
+  const booking = await bookingsCollection.findOne(query);
+ res.send(booking); 
+})
+
+app.post('/wishlist', async(req, res) =>{
+  const selectedItem = req.body
+  console.log(selectedItem);
+   const query = {
+       email: selectedItem.email,
+       name: selectedItem.name,
+   }
+  const result = await wishlistCollection.insertOne(selectedItem);
+  res.send(result);
+});
+
+app.get('/wishlist', verifyJWT, async(req, res) =>{
+  const email = req.query.email;
+  const decodedEmail = req.decoded.email;
+
+  if(email !== decodedEmail){
+      return res.status(403).send({message: 'forbidden access'});
+  }
+
+  app.get('/wishlist/:id', async(req, res) =>{
+    const id = req.params.id;
+    const query = { _id: ObjectId(id) } ;
+    const result = await wishlistCollection.findOne(query);
+   res.send(result); 
+  })
+
+  const query = {email: email};
+  const wishList = await wishlistCollection.find(query).toArray();
+  res.send(wishList);
 });
 
 app.get( '/product-categories', async (req, res) =>{
@@ -65,6 +127,7 @@ app.get('/category/:id', async(req, res) => {
   const category_products = products.filter(p => p.category_id === id);
   res.send(category_products);
   });
+
   app.post('/products', async(req, res) =>{
     const product = req.body;
     const result = await categoryProductCollection.insertOne(product);
@@ -114,7 +177,18 @@ app.post('/users', async(req, res) =>{
     const result = await usersCollection.insertOne(user);
     res.send(result);
 });
-
+app.put('/users/:admin/:id', verifyJWT,verifyAdmin, async(req, res) =>{
+  const id = req.params.id;
+  const filter = { _id: ObjectId(id) }
+  const options = { upsert: true };
+  const updatedDoc = {
+    $set: {
+      role: 'admin'
+    }
+  }
+  const result = await usersCollection.updateOne(filter, updatedDoc, options);
+  res.send(result);       
+       });
 }
   finally{
 
@@ -129,6 +203,9 @@ app.get('/', (req, res) => {
 app.listen(port, () =>{
   console.log(`server running on port: ${port}`)
 });
+
+
+
 
 
 

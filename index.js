@@ -212,6 +212,24 @@ async function run() {
       res.send(sellers);
     });
 
+    app.get("/myProducts", verifyJWT, async (req, res) => {
+      const decoded = req.decoded;
+
+      if (decoded.email !== req.query.email) {
+        res.status(403).send({ message: "unauthorized access" });
+      }
+
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+      const cursor = categoryProductCollection.find(query);
+      const products = await cursor.toArray();
+      res.send(products);
+    });
+
     app.get("/users/buyers", async (req, res) => {
       const query = {};
       const users = await usersCollection.find(query).toArray();

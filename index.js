@@ -3,6 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -42,7 +43,7 @@ async function run() {
     const usersCollection = client.db("TechMate").collection("users");
     const bookingsCollection = client.db("TechMate").collection("bookings");
     const wishlistCollection = client.db("TechMate").collection("wishlist");
-    const advertisementCollection = client.db("TechMate").collection("advertise");
+    const paymentsCollection = client.db('TechMate').collection("payments");
 
     const verifyAdmin = async (req, res, next) => {
       const decodedEmail = req.decoded.email;
@@ -148,7 +149,7 @@ async function run() {
       res.send(categories);
     });
 
-    app.get("/category/:id", async (req, res) => {
+    app.get("/products/category/:id", async (req, res) => {
       const id = req.params.id;
       const query = {};
       const products = await categoryProductCollection.find(query).toArray();
@@ -190,7 +191,7 @@ async function run() {
       if (user) {
         const token = jwt.sign({email}, process.env.ACCESS_TOKEN)
         // const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
-        //   expiresIn: "1day",
+        //   expiresIn: "7d",
         // });
         return res.send({ accessToken: token });
       }
@@ -252,6 +253,24 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await categoryProductCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    
+    app.put("/products/booking/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          booking: "allready booked",
+        },
+      };
+      const result = await categoryProductCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
       res.send(result);
     });
 
@@ -359,6 +378,39 @@ async function run() {
       );
       res.send(result);
     });
+
+    
+    app.post('/create-payment-intent',  verifyJWT, async(req, res)=>{
+      const booking = req.body;
+      const resale_price = booking.resale_price;
+      const amount = resale_price * 100;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+         currency: 'eur', 
+         amount: amount,
+          "payment_method_types": [
+            "card"
+         ]
+      });
+      res.send({
+         clientSecret: paymentIntent.client_secret,
+      });
+   });
+
+ app.post('/payments', verifyJWT, async (req, res) => {
+     const payment = req.body;
+     const result = await paymentsCollection.insertOne(payment);
+     const id = payment.bookingId
+     const filter = {_id: ObjectId(id)}
+     const updatedDoc = {
+         $set: {
+             paid: true,
+             transactionId: payment.transactionId
+         }
+     }
+     const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+     res.send(result);
+ });
 
   } finally {
   }
